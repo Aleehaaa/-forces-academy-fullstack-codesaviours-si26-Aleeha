@@ -6,4 +6,3 @@ header('Location: login.php');
 exit;
 ?>
  
-<!DOCTYPE html>...  ← ye sara hissa fazool hai, delete kar den
