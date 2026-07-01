@@ -50,7 +50,7 @@ $student_name = $_SESSION['student_name'];
             </div>
             <div class="card-body p-4">
                 <h2 class="mb-3">Welcome, <?php echo htmlspecialchars($student_name); ?>!</h2>
-                <p class="text-muted mb-0">Yeh aapka student dashboard hai. Aage yahan courses aur notices show honge.</p>
+                
             </div>
         </div>
     </div>
