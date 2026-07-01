@@ -22,11 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = mysqli_prepare($conn, $sql);
         mysqli_stmt_bind_param($stmt, 'sssss', $full_name, $email, $hashed, $roll_number, $class);
 
-        if (mysqli_stmt_execute($stmt)) {
+        try {
+            mysqli_stmt_execute($stmt);
             header('Location: login.php?registered=1');
             exit;
-        } else {
-            $error = 'Registration failed. Email or roll number may already exist.';
+        } catch (mysqli_sql_exception $e) {
+            $error = 'This email or roll number is already registered. Please login instead.';
         }
     }
 }
