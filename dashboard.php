@@ -1,12 +1,26 @@
 <?php
-session_start();
+require_once 'includes/auth_check.php';
+require_once 'config/db.php';
 
-if (!isset($_SESSION['student_id'])) {
-    header('Location: login.php');
-    exit;
-}
+$active = 'dashboard';
 
-$student_name = $_SESSION['student_name'];
+// Total Courses count
+$total_courses = 0;
+$res = mysqli_query($conn, "SELECT COUNT(*) AS total FROM courses");
+if ($res) { $total_courses = mysqli_fetch_assoc($res)['total']; }
+
+// Pending Assignments (placeholder for now)
+$pending_assignments = 0;
+
+// Latest Notice
+$latest_notice = null;
+$res2 = mysqli_query($conn, "SELECT title, created_at FROM notices ORDER BY created_at DESC LIMIT 1");
+if ($res2 && mysqli_num_rows($res2) > 0) { $latest_notice = mysqli_fetch_assoc($res2); }
+
+// Recent Notices (last 3)
+$recent_notices = [];
+$res3 = mysqli_query($conn, "SELECT title, content, created_at FROM notices ORDER BY created_at DESC LIMIT 3");
+if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent_notices[] = $row; } }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,53 +28,70 @@ $student_name = $_SESSION['student_name'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Forces Academy LMS</title>
-
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
     <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="dashboard.php">Forces Academy LMS</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><span class="nav-link">Welcome, <?php echo htmlspecialchars($student_name); ?></span></li>
-                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<div class="d-flex">
+    <?php require 'includes/sidebar.php'; ?>
 
-    <!-- Main content -->
-    <div class="container mt-5">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">Student Dashboard</h4>
+    <!-- Main content: takes remaining width -->
+    <div class="flex-grow-1 p-4" style="background-color:#f8f9fa; min-height:100vh;">
+
+        <h2 class="mb-4">Welcome, <?php echo htmlspecialchars($student_name); ?>!</h2>
+
+        <!-- Stats cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center p-3">
+                    <div class="fs-3 fw-bold" style="color:#0d2c54;"><?php echo $total_courses; ?></div>
+                    <div class="text-muted">Total Courses</div>
+                </div>
             </div>
-            <div class="card-body p-4">
-                <h2 class="mb-3">Welcome, <?php echo htmlspecialchars($student_name); ?>!</h2>
-                
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center p-3">
+                    <div class="fs-3 fw-bold" style="color:#0d2c54;"><?php echo $pending_assignments; ?></div>
+                    <div class="text-muted">Pending Assignments</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center p-3">
+                    <div class="fs-5 fw-bold" style="color:#0d2c54;">
+                        <?php echo $latest_notice ? htmlspecialchars($latest_notice['title']) : 'No notices yet'; ?>
+                    </div>
+                    <div class="text-muted">Latest Notice</div>
+                </div>
             </div>
         </div>
+
+        <!-- Recent notices -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header" style="background-color:#0d2c54; color:#fff;">Recent Notices</div>
+            <div class="card-body">
+                <?php if (empty($recent_notices)): ?>
+                    <p class="text-muted mb-0">No notices posted yet.</p>
+                <?php else: ?>
+                    <?php foreach ($recent_notices as $notice): ?>
+                        <div class="border-start border-3 ps-3 mb-3" style="border-color:#d4af37 !important;">
+                            <strong><?php echo htmlspecialchars($notice['title']); ?></strong>
+                            <div class="text-muted small"><?php echo date('d M Y, h:i A', strtotime($notice['created_at'])); ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="d-flex gap-3">
+            <a href="courses.php" class="btn btn-primary" style="background-color:#0d2c54; border-color:#0d2c54;">Go to My Courses</a>
+            <a href="assignments.php" class="btn" style="background-color:#d4af37; color:#212529;">Go to Assignments</a>
+        </div>
+
     </div>
+</div>
 
-    <!-- Footer -->
-    <footer class="text-center mt-5 py-3">
-        <p class="mb-0">&copy; 2026 Forces Academy LMS — Code Saviours SI-26</p>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
