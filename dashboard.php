@@ -9,8 +9,11 @@ $total_courses = 0;
 $res = mysqli_query($conn, "SELECT COUNT(*) AS total FROM courses");
 if ($res) { $total_courses = mysqli_fetch_assoc($res)['total']; }
 
-// Pending Assignments (placeholder for now)
+// Pending Assignments (assignments not yet submitted by this student)
 $pending_assignments = 0;
+$res_pending = mysqli_query($conn, "SELECT COUNT(*) AS total FROM assignments 
+    WHERE id NOT IN (SELECT assignment_id FROM submissions WHERE student_id = $student_id)");
+if ($res_pending) { $pending_assignments = mysqli_fetch_assoc($res_pending)['total']; }
 
 // Latest Notice
 $latest_notice = null;
