@@ -14,6 +14,18 @@ if (!$assignment_id || !isset($_FILES['submission_file']) || $_FILES['submission
     exit;
 }
 
+// Block submissions after the due date has passed
+$stmt = mysqli_prepare($conn, "SELECT due_date FROM assignments WHERE id = ?");
+mysqli_stmt_bind_param($stmt, 'i', $assignment_id);
+mysqli_stmt_execute($stmt);
+$due_result = mysqli_stmt_get_result($stmt);
+$assignment = mysqli_fetch_assoc($due_result);
+
+if (!$assignment || strtotime($assignment['due_date']) < strtotime(date('Y-m-d'))) {
+    header('Location: assignments.php?error=closed');
+    exit;
+}
+
 $file = $_FILES['submission_file'];
 
 $allowed_ext  = ['pdf', 'jpg', 'jpeg', 'png'];

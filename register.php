@@ -105,7 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Class</label>
-                            <input type="text" name="class" class="form-control" value="<?php echo isset($class) ? htmlspecialchars($class) : ''; ?>" required>
+                            <?php $selectedClass = $class ?? ''; ?>
+                            <select name="class" class="form-control" required>
+                                <option value="" disabled <?php echo $selectedClass === '' ? 'selected' : ''; ?>>Select your class</option>
+                                <option value="Computer Science" <?php echo $selectedClass === 'Computer Science' ? 'selected' : ''; ?>>Computer Science</option>
+                                <option value="Software Engineering" <?php echo $selectedClass === 'Software Engineering' ? 'selected' : ''; ?>>Software Engineering</option>
+                                <option value="Artificial Intelligence" <?php echo $selectedClass === 'Artificial Intelligence' ? 'selected' : ''; ?>>Artificial Intelligence</option>
+                            </select>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-accent w-100 py-2">Register</button>

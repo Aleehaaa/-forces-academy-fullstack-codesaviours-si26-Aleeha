@@ -4,15 +4,23 @@ require_once 'config/db.php';
 
 $active = 'dashboard';
 
-// Total Courses count
+// Total Courses count (only courses relevant to this student's class)
 $total_courses = 0;
-$res = mysqli_query($conn, "SELECT COUNT(*) AS total FROM courses");
+$stmt = mysqli_prepare($conn, "SELECT COUNT(*) AS total FROM courses WHERE target_class = 'All' OR target_class = ?");
+mysqli_stmt_bind_param($stmt, 's', $student_class);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
 if ($res) { $total_courses = mysqli_fetch_assoc($res)['total']; }
 
-// Pending Assignments (assignments not yet submitted by this student)
+// Pending Assignments (assignments not yet submitted by this student, only for their class)
 $pending_assignments = 0;
-$res_pending = mysqli_query($conn, "SELECT COUNT(*) AS total FROM assignments 
-    WHERE id NOT IN (SELECT assignment_id FROM submissions WHERE student_id = $student_id)");
+$stmt2 = mysqli_prepare($conn, "SELECT COUNT(*) AS total FROM assignments a
+    LEFT JOIN courses c ON a.course_id = c.id
+    WHERE (c.target_class = 'All' OR c.target_class = ? OR c.target_class IS NULL)
+    AND a.id NOT IN (SELECT assignment_id FROM submissions WHERE student_id = ?)");
+mysqli_stmt_bind_param($stmt2, 'si', $student_class, $student_id);
+mysqli_stmt_execute($stmt2);
+$res_pending = mysqli_stmt_get_result($stmt2);
 if ($res_pending) { $pending_assignments = mysqli_fetch_assoc($res_pending)['total']; }
 
 // Latest Notice

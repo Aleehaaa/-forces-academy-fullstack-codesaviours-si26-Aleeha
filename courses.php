@@ -5,7 +5,10 @@ require_once 'config/db.php';
 $active = 'courses';
 
 $courses = [];
-$result = mysqli_query($conn, "SELECT * FROM courses ORDER BY id DESC");
+$stmt = mysqli_prepare($conn, "SELECT * FROM courses WHERE target_class = 'All' OR target_class = ? ORDER BY id DESC");
+mysqli_stmt_bind_param($stmt, 's', $student_class);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $courses[] = $row;

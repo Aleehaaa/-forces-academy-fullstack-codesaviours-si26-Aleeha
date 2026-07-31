@@ -12,12 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $course_name  = trim($_POST['course_name']);
         $description  = trim($_POST['description']);
         $teacher_name = trim($_POST['teacher_name']);
+        $target_class = trim($_POST['target_class'] ?? 'All');
 
         if ($course_name === '' || $teacher_name === '') {
             $error = 'Course name and teacher name are required.';
         } else {
-            $stmt = mysqli_prepare($conn, "INSERT INTO courses (course_name, description, teacher_name) VALUES (?, ?, ?)");
-            mysqli_stmt_bind_param($stmt, 'sss', $course_name, $description, $teacher_name);
+            $stmt = mysqli_prepare($conn, "INSERT INTO courses (course_name, description, teacher_name, target_class) VALUES (?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, 'ssss', $course_name, $description, $teacher_name, $target_class);
             mysqli_stmt_execute($stmt);
             header('Location: courses.php');
             exit;
@@ -27,9 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $course_name  = trim($_POST['course_name']);
         $description  = trim($_POST['description']);
         $teacher_name = trim($_POST['teacher_name']);
+        $target_class = trim($_POST['target_class'] ?? 'All');
 
-        $stmt = mysqli_prepare($conn, "UPDATE courses SET course_name = ?, description = ?, teacher_name = ? WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, 'sssi', $course_name, $description, $teacher_name, $id);
+        $stmt = mysqli_prepare($conn, "UPDATE courses SET course_name = ?, description = ?, teacher_name = ?, target_class = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt, 'ssssi', $course_name, $description, $teacher_name, $target_class, $id);
         mysqli_stmt_execute($stmt);
         header('Location: courses.php');
         exit;
@@ -87,18 +89,20 @@ if ($result) {
                             <th>Course Name</th>
                             <th>Description</th>
                             <th>Teacher</th>
+                            <th>Class</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($courses)): ?>
-                            <tr><td colspan="4" class="text-center text-muted py-4">No courses added yet.</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">No courses added yet.</td></tr>
                         <?php else: ?>
                             <?php foreach ($courses as $c): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($c['course_name']); ?></td>
                                     <td><?php echo htmlspecialchars($c['description']); ?></td>
                                     <td><?php echo htmlspecialchars($c['teacher_name']); ?></td>
+                                    <td><span class="badge bg-secondary"><?php echo htmlspecialchars($c['target_class'] ?? 'All'); ?></span></td>
                                     <td class="text-end">
                                         <button type="button" class="btn btn-sm btn-primary"
                                                 data-bs-toggle="modal" data-bs-target="#editModal<?php echo $c['id']; ?>">
@@ -136,6 +140,16 @@ if ($result) {
                                                         <label class="form-label">Teacher Name</label>
                                                         <input type="text" name="teacher_name" class="form-control"
                                                                value="<?php echo htmlspecialchars($c['teacher_name']); ?>" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Class</label>
+                                                        <?php $currentClass = $c['target_class'] ?? 'All'; ?>
+                                                        <select name="target_class" class="form-control">
+                                                            <option value="All" <?php echo $currentClass === 'All' ? 'selected' : ''; ?>>All Classes</option>
+                                                            <option value="Computer Science" <?php echo $currentClass === 'Computer Science' ? 'selected' : ''; ?>>Computer Science</option>
+                                                            <option value="Software Engineering" <?php echo $currentClass === 'Software Engineering' ? 'selected' : ''; ?>>Software Engineering</option>
+                                                            <option value="Artificial Intelligence" <?php echo $currentClass === 'Artificial Intelligence' ? 'selected' : ''; ?>>Artificial Intelligence</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -202,6 +216,15 @@ if ($result) {
                     <div class="mb-3">
                         <label class="form-label">Teacher Name</label>
                         <input type="text" name="teacher_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Class</label>
+                        <select name="target_class" class="form-control">
+                            <option value="All">All Classes</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">

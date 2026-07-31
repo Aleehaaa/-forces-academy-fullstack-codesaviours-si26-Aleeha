@@ -8,8 +8,12 @@ $assignments = [];
 $sql = "SELECT a.id, a.title, a.description, a.due_date, c.course_name
         FROM assignments a
         LEFT JOIN courses c ON a.course_id = c.id
+        WHERE c.target_class = 'All' OR c.target_class = ? OR c.target_class IS NULL
         ORDER BY a.due_date ASC";
-$result = mysqli_query($conn, $sql);
+$stmt = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($stmt, 's', $student_class);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $assignments[] = $row;
@@ -56,6 +60,7 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
                     $errors = [
                         'filetype' => 'Only PDF or image files (jpg, jpeg, png) are allowed.',
                         'upload'   => 'File upload failed. Please try again.',
+                        'closed'   => 'This assignment\'s deadline has passed and is now closed for submissions.',
                     ];
                     echo htmlspecialchars($errors[$_GET['error']] ?? 'Something went wrong. Please try again.');
                 ?>
@@ -73,7 +78,10 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
         <?php else: ?>
             <div class="row g-4">
                 <?php foreach ($assignments as $a): ?>
-                    <?php $isSubmitted = isset($submitted_map[$a['id']]); ?>
+                    <?php
+                        $isSubmitted = isset($submitted_map[$a['id']]);
+                        $isOverdue   = strtotime($a['due_date']) < strtotime(date('Y-m-d'));
+                    ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card assignment-card h-100">
                             <div class="card-body d-flex flex-column">
@@ -87,6 +95,10 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
                                         <i class="bi bi-check-circle"></i>
                                         <?php echo $submitted_map[$a['id']] === 'graded' ? 'Graded' : 'Submitted'; ?>
                                     </span>
+                                <?php elseif ($isOverdue): ?>
+                                    <span class="badge bg-danger align-self-start px-3 py-2">
+                                        <i class="bi bi-lock"></i> Closed
+                                    </span>
                                 <?php else: ?>
                                     <button type="button" class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#submitModal<?php echo $a['id']; ?>">
                                         Submit Assignment
@@ -96,7 +108,7 @@ while ($row = mysqli_fetch_assoc($sub_result)) {
                         </div>
                     </div>
 
-                    <?php if (!$isSubmitted): ?>
+                    <?php if (!$isSubmitted && !$isOverdue): ?>
                     <div class="modal fade" id="submitModal<?php echo $a['id']; ?>" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
