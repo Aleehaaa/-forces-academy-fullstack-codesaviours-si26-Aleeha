@@ -6,30 +6,54 @@ $active = 'results';
 $error = '';
 $success = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Handle new result upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
     $student_id  = (int) $_POST['student_id'];
     $course_id   = (int) $_POST['course_id'];
-    $subject     = trim($_POST['subject']);
     $marks       = trim($_POST['marks']);
     $total_marks = trim($_POST['total_marks']);
     $grade       = trim($_POST['grade']);
     $exam_type   = trim($_POST['exam_type']);
 
-    if (!$student_id || $subject === '' || $marks === '' || $total_marks === '' || $grade === '' || $exam_type === '') {
+    if (!$student_id || !$course_id || $marks === '' || $total_marks === '' || $grade === '' || $exam_type === '') {
         $error = 'Please fill in all fields.';
     } else {
+        // Subject is auto-derived from the selected course's name
+        $subject = '';
+        $courseStmt = mysqli_prepare($conn, "SELECT course_name FROM courses WHERE id = ?");
+        mysqli_stmt_bind_param($courseStmt, 'i', $course_id);
+        mysqli_stmt_execute($courseStmt);
+        $courseResult = mysqli_stmt_get_result($courseStmt);
+        if ($courseRow = mysqli_fetch_assoc($courseResult)) {
+            $subject = $courseRow['course_name'];
+        }
+
         $stmt = mysqli_prepare($conn, "INSERT INTO results (student_id, course_id, subject, marks, total_marks, grade, exam_type)
                                         VALUES (?, ?, ?, ?, ?, ?, ?)");
         mysqli_stmt_bind_param($stmt, 'iisssss', $student_id, $course_id, $subject, $marks, $total_marks, $grade, $exam_type);
-        // Note: marks/total_marks bound as strings here works fine for numeric columns via mysqli.
         mysqli_stmt_execute($stmt);
         header('Location: results.php?uploaded=1');
         exit;
     }
 }
 
+// Handle result deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $delete_id = (int) $_POST['result_id'];
+    if ($delete_id) {
+        $delStmt = mysqli_prepare($conn, "DELETE FROM results WHERE id = ?");
+        mysqli_stmt_bind_param($delStmt, 'i', $delete_id);
+        mysqli_stmt_execute($delStmt);
+    }
+    header('Location: results.php?deleted=1');
+    exit;
+}
+
 if (isset($_GET['uploaded'])) {
     $success = 'Result uploaded successfully!';
+}
+if (isset($_GET['deleted'])) {
+    $success = 'Result deleted successfully!';
 }
 
 // Students for dropdown
@@ -44,7 +68,7 @@ if ($res2) { while ($row = mysqli_fetch_assoc($res2)) { $courses[] = $row; } }
 
 // Recently uploaded results (last 15)
 $recent = [];
-$sql = "SELECT r.id, s.full_name, c.course_name, r.subject, r.marks, r.total_marks, r.grade, r.exam_type
+$sql = "SELECT r.id, s.full_name, c.course_name, r.marks, r.total_marks, r.grade, r.exam_type
         FROM results r
         LEFT JOIN students s ON r.student_id = s.id
         LEFT JOIN courses c ON r.course_id = c.id
@@ -87,6 +111,7 @@ if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent[] = $row; } }
             <div class="card-header">New Result</div>
             <div class="card-body">
                 <form method="POST" action="results.php">
+                    <input type="hidden" name="action" value="add">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Student</label>
@@ -108,19 +133,15 @@ if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent[] = $row; } }
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Subject</label>
-                            <input type="text" name="subject" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Marks</label>
                             <input type="number" name="marks" class="form-control" required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Total Marks</label>
                             <input type="number" name="total_marks" class="form-control" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Grade</label>
                             <input type="text" name="grade" class="form-control" placeholder="e.g. A, B+" required>
                         </div>
@@ -151,10 +172,10 @@ if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent[] = $row; } }
                         <tr>
                             <th>Student</th>
                             <th>Course</th>
-                            <th>Subject</th>
                             <th>Marks</th>
                             <th>Grade</th>
                             <th>Exam Type</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,10 +186,17 @@ if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent[] = $row; } }
                                 <tr>
                                     <td><?php echo htmlspecialchars($r['full_name'] ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($r['course_name'] ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($r['subject']); ?></td>
                                     <td><?php echo htmlspecialchars($r['marks'] . ' / ' . $r['total_marks']); ?></td>
                                     <td><span class="badge bg-primary"><?php echo htmlspecialchars($r['grade']); ?></span></td>
                                     <td><?php echo htmlspecialchars($r['exam_type']); ?></td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="<?php echo (int) $r['id']; ?>"
+                                                data-student="<?php echo htmlspecialchars($r['full_name'] ?? 'this student'); ?>">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -179,6 +207,39 @@ if ($res3) { while ($row = mysqli_fetch_assoc($res3)) { $recent[] = $row; } }
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="results.php">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="result_id" id="deleteResultId" value="">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Result</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this result for <strong id="deleteStudentName"></strong>? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+        var student = button.getAttribute('data-student');
+        deleteModal.querySelector('#deleteResultId').value = id;
+        deleteModal.querySelector('#deleteStudentName').textContent = student;
+    });
+</script>
 </body>
 </html>

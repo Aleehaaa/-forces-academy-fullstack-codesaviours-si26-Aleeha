@@ -251,3 +251,238 @@ footer {
     font-weight: 500;
     font-size: 0.75rem;
 }
+
+/* ============================================================
+   RESPONSIVE / MOBILE FIXES
+   ============================================================ */
+
+/* Tablets */
+@media (max-width: 991.98px) {
+    .main-content {
+        padding: 1.75rem;
+    }
+}
+
+/* Mobile top bar + hamburger button (hidden on desktop by default) */
+.mobile-topbar {
+    display: none;
+}
+
+.sidebar-close-btn {
+    display: none;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+/* Phones */
+@media (max-width: 767.98px) {
+
+    .app-shell {
+        min-height: auto;
+    }
+
+    /* Fixed top bar shown only on mobile */
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        background-color: var(--primary-color);
+        padding: 0 1rem;
+        z-index: 1030;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-toggle-btn {
+        background: transparent;
+        border: none;
+        color: #ffffff;
+        font-size: 1.4rem;
+        line-height: 1;
+        padding: 0.25rem;
+    }
+
+    .mobile-topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .mobile-topbar-brand i {
+        color: var(--secondary-color);
+        font-size: 1.15rem;
+    }
+
+    /* Push page content below the fixed top bar */
+    .main-content {
+        padding-top: calc(56px + 1.1rem);
+    }
+
+    /* Sidebar becomes an off-canvas drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        max-width: 78vw;
+        height: 100vh;
+        min-height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+        z-index: 1050;
+        padding: 1.25rem 0;
+        box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .sidebar-close-btn {
+        display: block;
+        position: absolute;
+        top: 0.9rem;
+        right: 0.9rem;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 1.15rem;
+        padding: 0.25rem;
+    }
+
+    .sidebar-close-btn:hover {
+        color: #ffffff;
+    }
+
+    /* Dark backdrop behind the drawer */
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(13, 44, 84, 0.55);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Prevent background scroll while drawer is open */
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
+    .sidebar-brand {
+        padding: 0 1.25rem 1.25rem 1.25rem;
+    }
+
+    .sidebar-nav {
+        flex-direction: column;
+        padding: 0 0.75rem;
+        gap: 0.15rem;
+    }
+
+    .sidebar-link {
+        white-space: normal;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .sidebar-logout {
+        margin: 1rem 0.75rem 0 0.75rem;
+        padding-top: 1rem;
+    }
+
+    /* Content area breathing room on small screens */
+    .main-content {
+        padding-left: 1.1rem;
+        padding-right: 1.1rem;
+        padding-bottom: 1.1rem;
+    }
+
+    .dashboard-heading h2 {
+        font-size: 1.3rem;
+    }
+
+    .dashboard-heading p {
+        font-size: 0.85rem;
+    }
+
+    /* Stat cards: stack full width, tighten spacing */
+    .stat-card {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.15rem;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+    }
+
+    /* Quick action buttons stack and go full width */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .quick-actions .btn {
+        width: 100%;
+    }
+
+    /* Tables: allow horizontal scroll instead of breaking layout */
+    .table-responsive {
+        border-radius: 8px;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .card-header {
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Form rows in cards stack cleanly (Bootstrap already does this
+       via .row/.col-md-*, this just tightens spacing) */
+    .card-body {
+        padding: 1rem;
+    }
+
+    .notice-item,
+    .notice-board-item {
+        padding: 0.6rem 0.8rem;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+    .main-content {
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+        padding-bottom: 0.85rem;
+    }
+
+    .sidebar {
+        width: 240px;
+    }
+}
