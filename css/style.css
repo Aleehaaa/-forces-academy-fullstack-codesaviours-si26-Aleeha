@@ -486,3 +486,47 @@ footer {
         width: 240px;
     }
 }
+
+/* ===== Print Results (Week 7) ===== */
+.print-header {
+    display: none;
+}
+
+@media print {
+    .mobile-topbar,
+    .sidebar,
+    .sidebar-overlay,
+    .no-print {
+        display: none !important;
+    }
+
+    .app-shell {
+        display: block !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .print-header h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.2rem;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+
+    body {
+        background-color: #ffffff !important;
+    }
+}

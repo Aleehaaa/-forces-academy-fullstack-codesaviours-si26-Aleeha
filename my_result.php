@@ -27,9 +27,21 @@ while ($row = mysqli_fetch_assoc($res)) {
 <div class="app-shell">
     <?php require 'includes/sidebar.php'; ?>
     <div class="main-content">
-        <div class="dashboard-heading">
-            <h2>My Results</h2>
-            <p>Your exam results across all subjects.</p>
+        <div class="dashboard-heading d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h2>My Results</h2>
+                <p>Your exam results across all subjects.</p>
+            </div>
+            <?php if (!empty($results)): ?>
+                <button type="button" id="printResultsBtn" class="btn btn-accent no-print">
+                    <i class="bi bi-printer"></i> Print Results
+                </button>
+            <?php endif; ?>
+        </div>
+
+        <div class="print-header d-none">
+            <h3>Forces Academy LMS</h3>
+            <p>Result Sheet — <?php echo htmlspecialchars($student_name); ?></p>
         </div>
 
         <?php if (empty($results)): ?>
@@ -71,5 +83,13 @@ while ($row = mysqli_fetch_assoc($res)) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    var printBtn = document.getElementById('printResultsBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', function () {
+            window.print();
+        });
+    }
+</script>
 </body>
 </html>

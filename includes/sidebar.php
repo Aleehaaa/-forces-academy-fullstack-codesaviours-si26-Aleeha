@@ -5,6 +5,7 @@ $menu = [
     'courses'      => ['label' => 'My Courses',   'href' => 'courses.php',      'icon' => 'bi-journal-bookmark'],
     'assignments'  => ['label' => 'Assignments',  'href' => 'assignments.php',  'icon' => 'bi-clipboard-check'],
     'timetable'    => ['label' => 'Timetable',    'href' => 'timetable.php',    'icon' => 'bi-calendar-week'],
+    'fees'         => ['label' => 'Fees',         'href' => 'fees.php',         'icon' => 'bi-cash-coin'],
     'results'      => ['label' => 'My Results',   'href' => 'my_result.php',      'icon' => 'bi-bar-chart-line'],
     'notices'      => ['label' => 'Notices',      'href' => 'notices.php',      'icon' => 'bi-megaphone'],
     'profile'      => ['label' => 'Profile',      'href' => 'profile.php',      'icon' => 'bi-person-circle'],

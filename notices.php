@@ -4,8 +4,18 @@ require_once 'config/db.php';
 
 $active = 'notices';
 
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
 $notices = [];
-$result = mysqli_query($conn, "SELECT * FROM notices ORDER BY created_at DESC");
+if ($search !== '') {
+    $like = '%' . $search . '%';
+    $stmt = mysqli_prepare($conn, "SELECT * FROM notices WHERE title LIKE ? ORDER BY created_at DESC");
+    mysqli_stmt_bind_param($stmt, 's', $like);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+} else {
+    $result = mysqli_query($conn, "SELECT * FROM notices ORDER BY created_at DESC");
+}
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $notices[] = $row;
@@ -34,11 +44,21 @@ if ($result) {
             <p>Latest announcements from the academy.</p>
         </div>
 
+        <!-- Search bar -->
+        <form method="GET" action="notices.php" class="mb-4 d-flex gap-2" style="max-width: 420px;">
+            <input type="text" name="search" class="form-control" placeholder="Search notices by title"
+                   value="<?php echo htmlspecialchars($search); ?>">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+            <?php if ($search !== ''): ?>
+                <a href="notices.php" class="btn btn-secondary">Clear</a>
+            <?php endif; ?>
+        </form>
+
         <?php if (empty($notices)): ?>
             <div class="card notice-card">
                 <div class="card-body text-center py-5">
                     <i class="bi bi-megaphone" style="font-size:2.5rem; color:var(--text-muted);"></i>
-                    <p class="text-muted mt-3 mb-0">No notices posted yet.</p>
+                    <p class="text-muted mt-3 mb-0"><?php echo $search !== '' ? 'No notices match your search.' : 'No notices posted yet.'; ?></p>
                 </div>
             </div>
         <?php else: ?>

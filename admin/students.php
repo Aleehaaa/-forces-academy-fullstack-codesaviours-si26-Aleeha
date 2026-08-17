@@ -26,9 +26,9 @@ if ($search !== '') {
     $like = '%' . $search . '%';
     $stmt = mysqli_prepare($conn, "SELECT id, full_name, email, roll_number, class, created_at
                                     FROM students
-                                    WHERE full_name LIKE ? OR roll_number LIKE ?
+                                    WHERE full_name LIKE ? OR email LIKE ? OR roll_number LIKE ?
                                     ORDER BY id DESC");
-    mysqli_stmt_bind_param($stmt, 'ss', $like, $like);
+    mysqli_stmt_bind_param($stmt, 'sss', $like, $like, $like);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 } else {
@@ -64,7 +64,7 @@ if ($result) {
 
         <!-- Search bar -->
         <form method="GET" action="students.php" class="mb-4 d-flex gap-2" style="max-width: 420px;">
-            <input type="text" name="search" class="form-control" placeholder="Search by name or roll number"
+            <input type="text" name="search" class="form-control" placeholder="Search by name, email, or roll number"
                    value="<?php echo htmlspecialchars($search); ?>">
             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
             <?php if ($search !== ''): ?>
