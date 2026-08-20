@@ -18,7 +18,6 @@ A full-stack Learning Management System built for Forces Academy , with separate
 |---|---|---|
 | ![Admin Dashboard](screenshots/admin-dashboard.png) | ![Manage Students](screenshots/admin-students.png) | ![Notices](screenshots/notices.png) |
 
-> Add at least 4 screenshots in a `screenshots/` folder in the repo and swap the paths above — one from the login page, one student page, and one or two admin pages.
 
 ---
 
@@ -81,3 +80,19 @@ A full-stack Learning Management System built for Forces Academy , with separate
    - Use the admin login at `/admin/login.php` with an admin account created via `admin/create_admin.php`
 
 ## Project Structure
+forces-academy-lms/
+├── admin/ # Admin portal (dashboard, students, courses, fees, etc.)
+├── config/ # Database configuration (db.sample.php as template)
+├── css/ # Stylesheet
+├── includes/ # Shared components (sidebar, auth check)
+├── js/ # JavaScript
+├── uploads/ # Student-submitted assignment files
+├── *.php # Student-facing pages (dashboard, courses, assignments, etc.)
+└── README.md
+
+
+---
+
+Built by Aleeha | Code Saviours SI-26 | 2026
+
+
